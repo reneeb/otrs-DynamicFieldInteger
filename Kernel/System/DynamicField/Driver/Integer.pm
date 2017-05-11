@@ -102,12 +102,14 @@ sub new {
 sub ValueSet {
     my ( $Self, %Param ) = @_;
 
+    my $Value = $Param{Value} =~ m{\A-? [0-9]+ \z}xms ? $Param{Value} : undef;
+
     my $Success = $Kernel::OM->Get('Kernel::System::DynamicFieldValue')->ValueSet(
         FieldID  => $Param{DynamicFieldConfig}->{ID},
         ObjectID => $Param{ObjectID},
         Value    => [
             {
-                ValueInt => $Param{Value},
+                ValueInt => $Value,
             },
         ],
         UserID => $Param{UserID},
@@ -124,7 +126,7 @@ sub ValueGet {
         ObjectID => $Param{ObjectID},
     );
 
-    return if !$DFValue;
+    return if !defined $DFValue;
     return if !IsArrayRefWithData($DFValue);
     return if !IsHashRefWithData( $DFValue->[0] );
 
@@ -142,7 +144,7 @@ sub ValueValidate {
     );
 
     push @{ $Param{DynamicFieldConfig}->{Config}->{RegExList} }, {
-        Value        => qr/\A[+-]?[0-9]+\z/,
+        Value        => qr/\A\z|\A-?[0-9]+\z/,
         ErrorMessage => 'Not an integer',
     };
 
@@ -189,7 +191,7 @@ sub EditFieldValueValidate {
     my $ErrorMessage;
 
     push @{ $Param{DynamicFieldConfig}->{Config}->{RegExList} }, {
-        Value        => qr/\A[+-]?[0-9]+\z/,
+        Value        => qr/\A\z|\A-?[0-9]+\z/,
         ErrorMessage => 'Not an integer',
     };
 
